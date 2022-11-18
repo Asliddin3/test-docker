@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  customer-servis:
+    container_name: customer-servis
+    build: ./customer-servis
+    # network_mode: database-1.c9lxq3r1itbt.us-east-1.rds.amazonaws.com
+    environment:
+      - POSTGRES_PORT=5432
+      - POSTGRES_HOST=database-1.c9lxq3r1itbt.us-east-1.rds.amazonaws.com
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=customer
+      - POSTGRES_PASSWORD=asliddin2001
+      - ENVIRONMENT=develop
+      - LOG_LEVEL=develop
+    depends_on:
+      - 'post-service'
+    ports:
+      - '8810:8810'
+  migrate-customer:
+    image: migrate/migrate
+
+    volumes:
+      - ./customer-servis/migrations:/migrations
+    command: ['-path','/migrations','-database','postgres://postgres:asliddin2001@database-1.c9lxq3r1itbt.us-east-1.rds.amazonaws.com:5432/customer?sslmode=disable','up']
+    depends_on:
+      - 'customer-servis'
+  post-service:
+    container_name: post-service
+    build: ./post-service
+    # network_mode: host
+    # network_mode: database-1.c9lxq3r1itbt.us-east-1.rds.amazonaws.com
+    environment:
+      - POSTGRES_PORT=5432
+      - POSTGRES_HOST=database-1.c9lxq3r1itbt.us-east-1.rds.amazonaws.com
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=post
+      - POSTGRES_PASSWORD=asliddin2001
+      - ENVIRONMENT=develop
+      - LOG_LEVEL=develop
+    depends_on:
+      - 'review-servise'
+    ports:
+      - '8820:8820'
+  migrate-post:
+    image: migrate/migrate
+
+    volumes:
+      - ./post-service/migrations:/migrations
+    command: ['-path','/migrations','-database','postgres://postgres:asliddin2001@database-1.c9lxq3r1itbt.us-east-1.rds.amazonaws.com:5432/post?sslmode=disable','up']
+    depends_on:
+      - post-service
+  review-servise:
+    container_name: review-servise
+    build: ./review-servise
+    # network_mode: database-1.c9lxq3r1itbt.us-east-1.rds.amazonaws.com
+    environment:
+      - POSTGRES_PORT=5432
+      - POSTGRES_HOST=database-1.c9lxq3r1itbt.us-east-1.rds.amazonaws.com
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=review
+      - POSTGRES_PASSWORD=asliddin2001
+      - ENVIRONMENT=develop
+      - LOG_LEVEL=develop
+    ports:
+      - '8840:8840'
+  migrate-review:
+    image: migrate/migrate
+    volumes:
+      - ./review-servise/migrations:/migrations
+    command: ['-path','/migrations','-database','postgres://postgres:asliddin2001@database-1.c9lxq3r1itbt.us-east-1.rds.amazonaws.com:5432/review?sslmode=disable','up']
+    depends_on:
+      - 'review-servise'
+  api-gateway:
+    container_name: api-gateway
+    build: ./exam-api-gateway
+    # network_mode: database-1.c9lxq3r1itbt.us-east-1.rds.amazonaws.com
+
+    # network_mode: host
+    environment:
+      - POSTGRES_PORT=5432
+      - POSTGRES_HOST=database-1.c9lxq3r1itbt.us-east-1.rds.amazonaws.com
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=api
+      - POSTGRES_PASSWORD=asliddin2001
+      - ENVIRONMENT=develop
+      - LOG_LEVEL=develop
+    depends_on:
+      - 'post-service'
+      - 'review-servise'
+      - 'customer-servis'
+      - 'redisdb'
+    ports:
+      - '8070:8070'
+  migrate-api:
+    image: migrate/migrate
+
+    volumes:
+      - ./exam-api-gateway/migrations:/migrations
+    command: ['-path','/migrations','-database','postgres://postgres:asliddin2001@database-1.c9lxq3r1itbt.us-east-1.rds.amazonaws.com:5432/api?sslmode=disable','up']
+    depends_on:
+      - api-gateway
+  redisdb:
+    container_name: redisdb
+    image: redis:latest
+    ports:
+      - '6381:6379'
