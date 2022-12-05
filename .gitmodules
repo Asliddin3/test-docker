@@ -1,0 +1,15 @@
+[submodule "review-servise"]
+	path = review-servise
+	url = git@github.com:Asliddin3/review-servise.git
+[submodule "post-service"]
+	path = post-service
+	url = git@github.com:Asliddin3/post-service.git
+[submodule "customer-servis"]
+	path = customer-servis
+	url = git@github.com:Asliddin3/customer-servis.git
+[submodule "protos"]
+	path = protos
+	url = git@github.com:Asliddin3/protos.git
+[submodule "exam-api-gateway"]
+	path = exam-api-gateway
+	url = git@github.com:Asliddin3/exam-api-gateway.git
