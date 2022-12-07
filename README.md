@@ -1,5 +1,6 @@
 # test-docker
 docker compose build 
+
 docker compose up
 
 You should create topic in localhost:8080
